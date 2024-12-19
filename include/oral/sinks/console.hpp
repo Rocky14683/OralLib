@@ -4,10 +4,15 @@
 
 namespace oral {
 
+class Console;
+
 enum class ConsoleLogLevel { DEBUG, INFO, WARN, ERROR, FATAL, OFF };
 
 class Console : public AbstractSink<Console, ConsoleLogLevel> {
     public:
+        using AbstractSink<Console, ConsoleLogLevel>::AbstractSink;
+        friend class AbstractSink<Console, ConsoleLogLevel>;
+
         Console() : AbstractSink<Console, ConsoleLogLevel>() {}
 
         static std::shared_ptr<Console> get_instance() {
@@ -15,13 +20,15 @@ class Console : public AbstractSink<Console, ConsoleLogLevel> {
             return instance;
         }
 
-        void process_log(ConsoleLogLevel level, std::string&& str) override {
+        void process_log(ConsoleLogLevel level, std::string&& str) noexcept override {
             this->queue.push(std::move(str));
         }
     private:
         static std::once_flag static_flag;
         static std::shared_ptr<Console> instance;
 };
+
+
 
 std::once_flag Console::static_flag {};
 std::shared_ptr<Console> Console::instance = Console::get_instance();
